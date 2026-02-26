@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a1628;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            background: rgba(10,22,40,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span { color: #2496ed; }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .nav-links a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover { color: white; }
+
+        .hero {
+            text-align: center;
+            max-width: 640px;
+            padding: 40px 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(36,150,237,0.12);
+            color: #2496ed;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(36,150,237,0.25);
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 60%, #2496ed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p.desc {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        .search-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 13px 18px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input::placeholder { color: rgba(255,255,255,0.3); }
+        input:focus { border-color: #2496ed; }
+
+        .btn {
+            padding: 13px 24px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #2496ed;
+            color: white;
+        }
+
+        .btn-primary:hover { background: #1a7fd4; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        #result {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+            min-height: 18px;
+            text-align: left;
+            padding-left: 4px;
+            margin-bottom: 36px;
+        }
+
+        #result.success { color: #4ade80; }
+        #result.searching { color: rgba(255,255,255,0.4); }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1px;
+            margin-top: 64px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .stat {
+            flex: 1;
+            padding: 20px 32px;
+            text-align: center;
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s;
+        }
+
+        .stat:hover { background: rgba(255,255,255,0.05); }
+
+        .stat-num {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2496ed;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+            letter-spacing: 0.03em;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            background: #1e2d42;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.85);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">🐳 <span>Docker</span></div>
+        <div class="nav-links">
+            <a>Products</a>
+            <a>Developers</a>
+            <a>Pricing</a>
+            <a>Docs</a>
+        </div>
+        <button class="btn btn-primary" style="padding:9px 18px;font-size:0.8rem;">Get Started</button>
+    </nav>
+
+    <div class="hero">
+        <div class="badge">Container Platform</div>
+        <h1>Build, Ship &amp;<br>Run Anywhere</h1>
+        <p class="desc">Docker makes development efficient and predictable. Package your application and its dependencies into a lightweight container.</p>
+
+        <div class="search-wrap">
+            <input id="searchInput" type="text" placeholder="Search Docker Hub — e.g. nginx, postgres..." />
+            <button class="btn btn-primary" onclick="searchImage()">Search</button>
+        </div>
+        <div id="result"></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="pullImage()">Pull Image</button>
+            <button class="btn btn-ghost" onclick="runContainer()">Run Container</button>
+            <button class="btn btn-ghost" onclick="stopAll()">Stop All</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num" id="containers">0</div>
+                <div class="stat-label">Containers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" id="images">0</div>
+                <div class="stat-label">Images</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" id="pulls">0M</div>
+                <div class="stat-label">Total Pulls</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function animateStat(id, target, suffix = '') {
+            let current = 0;
+            const el = document.getElementById(id);
+            const step = Math.ceil(target / 50);
+            const interval = setInterval(() => {
+                current = Math.min(current + step, target);
+                el.textContent = current + suffix;
+                if (current >= target) clearInterval(interval);
+            }, 25);
+        }
+
+        animateStat('containers', 12);
+        animateStat('images', 8);
+        animateStat('pulls', 142, 'M');
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        let containers = 12, images = 8;
+
+        function searchImage() {
+            const val = document.getElementById('searchInput').value.trim();
+            const result = document.getElementById('result');
+            if (!val) { result.textContent = 'Please enter an image name.'; result.className = ''; return; }
+            result.textContent = 'Searching Docker Hub...';
+            result.className = 'searching';
+            setTimeout(() => {
+                result.textContent = '✓ Found ' + val + ':latest — ready to pull.';
+                result.className = 'success';
+            }, 900);
+        }
+
+        function pullImage() {
+            const input = document.getElementById('searchInput').value.trim();
+            const name = input || 'nginx:latest';
+            images++;
+            document.getElementById('images').textContent = images;
+            showToast('Pulled ' + name);
+        }
+
+        function runContainer() {
+            containers++;
+            document.getElementById('containers').textContent = containers;
+            showToast('Container started');
+        }
+
+        function stopAll() {
+            containers = 0;
+            document.getElementById('containers').textContent = 0;
+            showToast('All containers stopped');
+        }
+
+        document.getElementById('searchInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') searchImage();
+        });
+    </script>
+</body>
+</html>
